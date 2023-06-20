@@ -28,10 +28,11 @@ def Ec2_to_s3():
 
     Bucket_path = f'0000/0000000/{splits[7]}/{splits[8]}/{splits[9]}'
 
-    days_threshold = 30
+    # days_threshold = 30
+    minutes_threshold = 1
 
     current_time = datetime.now(timezone.utc)
-    threshold_time = current_time - timedelta(days= days_threshold)
+    threshold_time = current_time - timedelta(minutes= minutes_threshold)
     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix= Bucket_path)
     objects_to_delete =[]
 
