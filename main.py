@@ -20,7 +20,7 @@ bucket_path = '00001/00002/00003/files/'
 
 bucket_name = 'abdata' 
 # s3_prefix = ''
-file_format = '.txt'
+file_format = '.gz'
 
 ec2_client = boto3.client('ec2', region_name=region, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
@@ -45,20 +45,21 @@ temp_directory = 'ab1/tmp/files/'
 os.makedirs(temp_directory)
 
 sftp_client = ssh_client.open_sftp()
-remote_files = sftp_client.listdir('/home/ubuntu/mahesh/')
+remote_files = sftp_client.listdir('/home/ubuntu/raj/')
 print(remote_files)
 
 
 for file_name in remote_files:
     if file_name.endswith(file_format):
-        remote_file_path = f'/home/ubuntu/mahesh/{file_name}'
+        remote_file_path = f'/home/ubuntu/raj/{file_name}'
         local_file_path = os.path.join(temp_directory, file_name)
         sftp_client.get(remote_file_path, local_file_path)
         # s3_key = f'{s3_prefix}/{file_name}' if s3_prefix else file_name
         # s3_client.upload_file(local_file_path, bucket_name,s3_key)
-        relative_path = os.path.relpath(local_file_path, remote_file_path)
-        s3_key = os.path.join(bucket_path, relative_path)
-        s3_client.upload_file(local_file_path, bucket_name,s3_key)
+        # relative_path = os.path.relpath(local_file_path, remote_file_path)
+        # s3_key = os.path.join(bucket_path, relative_path)
+        path = f'{bucket_path}{file_name}'
+        s3_client.upload_file(local_file_path, bucket_name,Key = path)
         
 sftp_client.close()
 ssh_client.close()
@@ -74,9 +75,7 @@ days_threshold = 1
 hour_threshold  = 1
 minutes_threshold = 1
 current_time = datetime.now(timezone.utc)
-print(current_time)
-threshold_time = current_time - timedelta(minutes= minutes_threshold)
-print(threshold_time)
+threshold_time = current_time - timedelta(hours= hour_threshold)
 response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix= bucket_path)
 objects_to_delete =[]
 
