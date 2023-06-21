@@ -85,7 +85,7 @@ def Ec2_to_s3():
 
     for file_name in remote_files:
         if file_name.endswith(file_format):
-            temp_directory = 'ab1/tmp/files/'
+            temp_directory = 'PacBio/tmp/files/'
             os.makedirs(temp_directory)
             remote_file_path = f'/{source_path}/{file_name}'
             local_file_path = os.path.join(temp_directory, file_name)
@@ -98,7 +98,7 @@ def Ec2_to_s3():
     sftp_client.close()
     ssh_client.close()
 
-    # shutil.rmtree(temp_directory)
+    shutil.rmtree(temp_directory)
 
     s3_url = f"https://s3.console.aws.amazon.com/s3/buckets/{bucket_name}?region={region}&tab=objects"
     print(f"Data transferred to S3: {s3_url}")
