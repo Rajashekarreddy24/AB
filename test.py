@@ -49,7 +49,8 @@ def Ec2_to_s3():
                     files = file_key['Key']
                     copy_source = {"Bucket" : bucket_name, "Key" : files}
                     s3_client.copy(copy_source,Bucket =Backup_bucket, Key = files)  
-                print(f'Total {len(files)} out of {len(objects_to_delete)} files copied successfully')
+                    
+                print(f'Total {len(files)} out of {len(objects_to_delete)} files copied successfully....')
                 
     
 
