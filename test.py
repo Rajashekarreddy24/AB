@@ -26,7 +26,6 @@ def Ec2_to_s3():
 
     bucket_name = 'sequencingrunslatchbio'
     
-    
 
     Bucket_path = f'0000/0000000/{splits[7]}/{splits[8]}/{splits[9]}'
     
@@ -49,10 +48,8 @@ def Ec2_to_s3():
                 for file_key in objects_to_delete:
                     files = file_key['Key']
                     copy_source = {"Bucket" : bucket_name, "Key" : files}
-                    s3_client.copy(copy_source,Bucket =Backup_bucket, Key = files)
-
-                    
-        print(f'Total {len(files)} out of {len(objects_to_delete)} files copied successfully')
+                    s3_client.copy(copy_source,Bucket =Backup_bucket, Key = files)  
+                print(f'Total {len(files)} out of {len(objects_to_delete)} files copied successfully')
                 
     
 

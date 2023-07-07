@@ -6,6 +6,7 @@ import shutil
 from datetime import datetime , timedelta, timezone
 
 
+
 def Ec2_to_s3():
     
     region = 'us-east-1' 
@@ -30,9 +31,6 @@ def Ec2_to_s3():
     
     Backup_bucket = 'archivefroms3'
     
-    # Backup_path = ''
-
-    
     days_threshold = 30
     current_time = datetime.now(timezone.utc)
     threshold_time = current_time - timedelta(days= days_threshold)
@@ -45,9 +43,11 @@ def Ec2_to_s3():
             last_modified = obj['LastModified']
             if last_modified < threshold_time:
                 objects_to_delete.append({'Key' : key})
-                
-    # s3_client.copy(objects_to_delete, Backup_bucket, Key = Backup_path)
-                
+                for file_key in objects_to_delete: # Coping the Threshold time files to backup bucket...
+                    files = file_key['Key']
+                    copy_source = {'Bucket' : bucket_name, 'Key' :files}
+                    s3_client.copy(copy_source, Bucket = Backup_bucket, Key = files)
+                    print(f'file {len(files)}/{len(objects_to_delete)} copied successfully..')
     while objects_to_delete:
         batch = objects_to_delete[:1000]
         response = s3_client.delete_objects(Bucket = bucket_name, Delete = {'Objects' : batch})
@@ -77,9 +77,6 @@ def Ec2_to_s3():
 
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh_client.connect(public_ip, username = ssh_username, password= ssh_password, timeout= 10000.0)
-
-    # temp_directory = 'ab1/tmp/files/'
-    # os.makedirs(temp_directory)
 
     sftp_client = ssh_client.open_sftp()
     remote_files = sftp_client.listdir(f'/{source_path}')
