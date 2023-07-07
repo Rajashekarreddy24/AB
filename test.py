@@ -35,7 +35,6 @@ def Ec2_to_s3():
     
     current_time = datetime.now(timezone.utc)
     threshold_time = current_time - timedelta(days= days_threshold)
-    print(threshold_time)
     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix= Bucket_path)
     objects_to_delete =[]
 
@@ -47,10 +46,10 @@ def Ec2_to_s3():
                 objects_to_delete.append({'Key' : key})
                 for file_key in objects_to_delete:
                     files = file_key['Key']
-                    copy_source = {"Bucket" : bucket_name, "Key" : files}
-                    s3_client.copy(copy_source,Bucket =Backup_bucket, Key = files)  
+                    # copy_source = {"Bucket" : bucket_name, "Key" : files}
+                    # s3_client.copy(copy_source,Bucket =Backup_bucket, Key = files)  
                     
-                print(f'Total {len(files)} out of {len(objects_to_delete)} files copied successfully....')
+        print(f'File {len(objects_to_delete)}  copied successfully....')
                 
     
 

@@ -31,9 +31,9 @@ def Ec2_to_s3():
     
     Backup_bucket = 'archivefroms3'
     
-    days_threshold = 30
+    days_threshold = 1
     current_time = datetime.now(timezone.utc)
-    threshold_time = current_time - timedelta(days= days_threshold)
+    threshold_time = current_time - timedelta(minutes= days_threshold)
     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix= Bucket_path)
     objects_to_delete =[]
 
@@ -43,21 +43,24 @@ def Ec2_to_s3():
             last_modified = obj['LastModified']
             if last_modified < threshold_time:
                 objects_to_delete.append({'Key' : key})
-                for file_key in objects_to_delete: # Coping the Threshold time files to backup bucket...
+                for file_key in objects_to_delete: # Copying the Threshold time files to backup bucket...
                     files = file_key['Key']
                     copy_source = {'Bucket' : bucket_name, 'Key' :files}
                     s3_client.copy(copy_source, Bucket = Backup_bucket, Key = files)
-                    print(f'file {len(files)}/{len(objects_to_delete)} copied successfully..')
-    while objects_to_delete:
-        batch = objects_to_delete[:1000]
-        response = s3_client.delete_objects(Bucket = bucket_name, Delete = {'Objects' : batch})
+                print(f'The File {len(objects_to_delete)} copied from {bucket_name} to {Backup_bucket} successfully..')
+                batch = objects_to_delete[:1000]
+                response = s3_client.delete_objects(Bucket = bucket_name, Delete = {'Objects' : batch})
+                print(f'The File {len(batch)} Removed from {bucket_name}  successfully')
+    # while objects_to_delete:
+    #     batch = objects_to_delete[:1000]
+    #     response = s3_client.delete_objects(Bucket = bucket_name, Delete = {'Objects' : batch})
         
-        if 'Deleted' in response:
-            deleted_objects = response['Deleted']
-            print (f"Deleted {len(deleted_objects)} objects")
-            objects_to_delete = objects_to_delete[1000:]
-        else:
-            break
+    if 'Deleted' in response:
+        deleted_objects = response['Deleted']
+        print (f"Deleted {len(deleted_objects)} objects")
+        objects_to_delete = objects_to_delete[1000:]
+    else:
+        print(f"No File to Remove out of {len(objects_to_delete)}")
 
     #  code to transfer the files from Ec2 instance to the S3 bucket
 
@@ -97,7 +100,7 @@ def Ec2_to_s3():
     sftp_client.close()
     ssh_client.close()
 
-    shutil.rmtree(temp_directory)
+    # shutil.rmtree(temp_directory)
 
     s3_url = f"https://s3.console.aws.amazon.com/s3/buckets/{bucket_name}?region={region}&tab=objects"
     print(f"Data transferred to S3: {s3_url}")
