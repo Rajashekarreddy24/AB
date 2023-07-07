@@ -27,15 +27,15 @@ def Ec2_to_s3():
     bucket_name = 'sequencingrunslatchbio'
 
     Bucket_path = f'0000/0000000/{splits[7]}/{splits[8]}/{splits[9]}'
+    
+    Backup_bucket = 'archivefroms3'
+    
+    # Backup_path = ''
 
+    
     days_threshold = 30
-    # minutes_threshold = 1
-
     current_time = datetime.now(timezone.utc)
-    print(current_time)
-
     threshold_time = current_time - timedelta(days= days_threshold)
-    print(threshold_time)
     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix= Bucket_path)
     objects_to_delete =[]
 
@@ -45,6 +45,8 @@ def Ec2_to_s3():
             last_modified = obj['LastModified']
             if last_modified < threshold_time:
                 objects_to_delete.append({'Key' : key})
+                
+    # s3_client.copy(objects_to_delete, Backup_bucket, Key = Backup_path)
                 
     while objects_to_delete:
         batch = objects_to_delete[:1000]
